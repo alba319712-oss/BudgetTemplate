@@ -9,7 +9,6 @@ st.set_page_config(
 )
 
 # 2. Embed the entire HTML, CSS, and JS code into a single Python string
-# Note: Backslashes in regex have been escaped (\\u) to prevent Python surrogate errors
 html_code = """
 <!DOCTYPE html>
 <html lang="en">
@@ -444,7 +443,7 @@ html_code = """
   </div>
 
   <script>
-    // CLEANED TEMPLATE DATA (Amounts default to 0.00 so users can enter their own values!)
+    // CLEANED TEMPLATE DATA
     const defaultIncome = [
       { name: '🤑 Salary', amount: 0.00 },
       { name: '❣️ socials', amount: 0.00 },
@@ -475,8 +474,7 @@ html_code = """
       const lower = name.toLowerCase().trim();
       
       // If user already typed an emoji at the start, don't add another one
-      // Doubled the backslashes here (\\\\) to prevent Python surrogate compilation crash!
-      const emojiRegex = /^(\\\\u00a9|\\\\u00ae|[\\\\u2000-\\\\u3300]|\\\\ud83c[\\\\ud000-\\\\udfff]|\\\\ud83d[\\\\ud000-\\\\udfff]|\\\\ud83e[\\\\ud000-\\\\udfff])/g;
+      const emojiRegex = /^(\\u00a9|\\u00ae|[\\u2000-\\u3300]|\\ud83c[\\ud000-\\udfff]|\\ud83d[\\ud000-\\udfff]|\\ud83e[\\ud000-\\udfff])/g;
       if (emojiRegex.test(name)) {
         return name;
       }
@@ -534,7 +532,7 @@ html_code = """
       renderAll();
     }
 
-    // (Remaining rendering, forms, loadDemoData and local backup logic unchanged...)
+    // Removed the backslash escape before the dollar sign in JS template strings!
     function renderAll() {
       const symbols = document.querySelectorAll('.curr-symbol');
       symbols.forEach(span => span.textContent = currentCurrency);
@@ -546,9 +544,9 @@ html_code = """
         totalIncome += item.amount;
         incomeBody.innerHTML += `
           <tr>
-            <td>\${item.name}</td>
-            <td class="amount-col">\${currentCurrency}\${item.amount.toFixed(2)}</td>
-            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('income', \${index})">×</button></td>
+            <td>${item.name}</td>
+            <td class="amount-col">${currentCurrency}${item.amount.toFixed(2)}</td>
+            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('income', ${index})">×</button></td>
           </tr>
         `;
       });
@@ -562,9 +560,9 @@ html_code = """
         totalExpenses += item.amount;
         expenseBody.innerHTML += `
           <tr>
-            <td>\${item.name}</td>
-            <td class="amount-col">\${currentCurrency}\${item.amount.toFixed(2)}</td>
-            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('expense', \${index})">×</button></td>
+            <td>${item.name}</td>
+            <td class="amount-col">${currentCurrency}${item.amount.toFixed(2)}</td>
+            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('expense', ${index})">×</button></td>
           </tr>
         `;
       });
@@ -606,6 +604,7 @@ html_code = """
       renderAll();
     }
 
+    // Fixed the indexing inside the backticks here as well!
     function removeItem(type, index) {
       if (type === 'income') {
         incomeItems.splice(index, 1);
