@@ -1,0 +1,12 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Make the Streamlit page layout wide
+st.set_page_config(layout="wide", page_title="Spiced Budget Planner")
+
+# Read your HTML file
+with open("budgettemplate.html", "r", encoding="utf-8") as f:
+    html_code = f.read()
+
+# Render the HTML file (adjust height as needed)
+components.html(html_code, height=1500, scrolling=True)
