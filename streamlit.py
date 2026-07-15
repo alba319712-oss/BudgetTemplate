@@ -9,6 +9,7 @@ st.set_page_config(
 )
 
 # 2. Embed the entire HTML, CSS, and JS code into a single Python string
+# Note: Backslashes in regex have been escaped (\\u) to prevent Python surrogate errors
 html_code = """
 <!DOCTYPE html>
 <html lang="en">
@@ -474,7 +475,8 @@ html_code = """
       const lower = name.toLowerCase().trim();
       
       // If user already typed an emoji at the start, don't add another one
-      const emojiRegex = /^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+      // Doubled the backslashes here (\\\\) to prevent Python surrogate compilation crash!
+      const emojiRegex = /^(\\\\u00a9|\\\\u00ae|[\\\\u2000-\\\\u3300]|\\\\ud83c[\\\\ud000-\\\\udfff]|\\\\ud83d[\\\\ud000-\\\\udfff]|\\\\ud83e[\\\\ud000-\\\\udfff])/g;
       if (emojiRegex.test(name)) {
         return name;
       }
@@ -532,11 +534,11 @@ html_code = """
       renderAll();
     }
 
+    // (Remaining rendering, forms, loadDemoData and local backup logic unchanged...)
     function renderAll() {
       const symbols = document.querySelectorAll('.curr-symbol');
       symbols.forEach(span => span.textContent = currentCurrency);
 
-      // Render Income Table
       const incomeBody = document.getElementById('income-table-body');
       incomeBody.innerHTML = '';
       let totalIncome = 0;
@@ -544,16 +546,15 @@ html_code = """
         totalIncome += item.amount;
         incomeBody.innerHTML += `
           <tr>
-            <td>${item.name}</td>
-            <td class="amount-col">${currentCurrency}${item.amount.toFixed(2)}</td>
-            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('income', ${index})">×</button></td>
+            <td>\${item.name}</td>
+            <td class="amount-col">\${currentCurrency}\${item.amount.toFixed(2)}</td>
+            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('income', \${index})">×</button></td>
           </tr>
         `;
       });
       document.getElementById('income-sum').textContent = totalIncome.toFixed(2);
       document.getElementById('stat-total-income').textContent = totalIncome.toFixed(2);
 
-      // Render Expense Table
       const expenseBody = document.getElementById('expense-table-body');
       expenseBody.innerHTML = '';
       let totalExpenses = 0;
@@ -561,20 +562,18 @@ html_code = """
         totalExpenses += item.amount;
         expenseBody.innerHTML += `
           <tr>
-            <td>${item.name}</td>
-            <td class="amount-col">${currentCurrency}${item.amount.toFixed(2)}</td>
-            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('expense', ${index})">×</button></td>
+            <td>\${item.name}</td>
+            <td class="amount-col">\${currentCurrency}\${item.amount.toFixed(2)}</td>
+            <td style="text-align: right;"><button class="delete-btn" onclick="removeItem('expense', \${index})">×</button></td>
           </tr>
         `;
       });
       document.getElementById('expense-sum').textContent = totalExpenses.toFixed(2);
       document.getElementById('stat-total-expenses').textContent = totalExpenses.toFixed(2);
 
-      // Calculate balance
       const remaining = totalIncome - totalExpenses;
       document.getElementById('stat-remaining').textContent = remaining.toFixed(2);
 
-      // Over-Budget logic alert
       const alertBanner = document.getElementById('over-budget-alert');
       if (totalExpenses > totalIncome) {
         alertBanner.style.display = 'block';
@@ -582,7 +581,6 @@ html_code = """
         alertBanner.style.display = 'none';
       }
 
-      // Save arrays to local storage
       localStorage.setItem('incomeItems', JSON.stringify(incomeItems));
       localStorage.setItem('expenseItems', JSON.stringify(expenseItems));
       localStorage.setItem('currentCurrency', currentCurrency);
@@ -629,7 +627,6 @@ html_code = """
       }
     }
 
-    /* Template Utilities */
     function loadDemoData() {
       if (confirm('Reset to standard demo data? This will overwrite current entries.')) {
         incomeItems = [...defaultIncome];
@@ -646,7 +643,6 @@ html_code = """
       }
     }
 
-    // Exports user data to a local JSON file (backup system)
     function exportData() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
         incomeItems,
@@ -662,7 +658,6 @@ html_code = """
       downloadAnchor.remove();
     }
 
-    // Imports user data from a local JSON file
     function importData(event) {
       const fileReader = new FileReader();
       fileReader.onload = function(e) {
